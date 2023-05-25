@@ -205,22 +205,23 @@ def calc_weights_for_cross_efficiency(inputs, outputs, index, efficiency, agress
     return v_values, u_values
 
 # row of cross-efficiency matrix
-def calc_efficiency_from_weights(inputs, outputs, weights_input, weights_output):
+def calc_efficiency_from_weights(inputs, outputs, weights_input, weights_output, normalize = False):
     eff_list = []
     for out in outputs:
         eff = 0
-        for o, w in zip(out,weights_output):
-            eff+= o*w
+        for o, waga in zip(out,weights_output):
+            eff+= o*waga
 
         eff_list.append(eff)
     
     for i, inp in enumerate(inputs):
         eff = 0
-        for o, w in zip(inp,weights_input):
-            eff+= o*w
+        for o, waga in zip(inp,weights_input):
+            eff+= o*waga
 
         eff_list[i]/=eff
-
+    if normalize:
+        eff_list /= np.max(eff_list)
     return eff_list
 
 def calc_cross_efficiency_matrix(inputs, outputs):
@@ -246,7 +247,7 @@ def calc_cross_efficiency(inputs, outputs, roundDecimals = None):
     return cross_efficiency, cross_matrix
     
 def calc_monte_carlo(inputs, outputs, inputs_weights, outputs_weights, interval_num = 5):
-    eff_list = [calc_efficiency_from_weights(inputs, outputs, in_w, out_w) for in_w, out_w in zip(inputs_weights, outputs_weights)]
+    eff_list = [calc_efficiency_from_weights(inputs, outputs, in_w, out_w, normalize = True) for in_w, out_w in zip(inputs_weights, outputs_weights)]
     eff_list = np.array(eff_list)
     
     eff_mean = []
@@ -268,8 +269,8 @@ def calc_monte_carlo(inputs, outputs, inputs_weights, outputs_weights, interval_
 if __name__ == "__main__":
     inputs, units_names, _ = load("inputs.csv")
     outputs, _, _ = load("outputs.csv")
-    inputs, units_names, _ = load("inputs_test.csv")
-    outputs, _, _ = load("outputs_test.csv")
+    # inputs, units_names, _ = load("inputs_test.csv")
+    # outputs, _, _ = load("outputs_test.csv")
     # print(calc_eff2(inputs, outputs, ids, do_super_eff= True))
     # print(calc_eff(inputs, outputs, ids, do_super_eff= True))
     
