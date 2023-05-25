@@ -35,7 +35,6 @@ def load_samples(filename):
 def calc_HCU(inputs, outputs, lambdas):
     top = np.sum(lambdas)
     lambdas = np.copy(lambdas)
-    print(lambdas)
 
     ret_in = np.zeros_like(inputs[0])
     ret_out = np.zeros_like(outputs[0])
