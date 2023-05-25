@@ -248,18 +248,22 @@ def calc_cross_efficiency(inputs, outputs, roundDecimals = None):
 def calc_monte_carlo(inputs, outputs, inputs_weights, outputs_weights, interval_num = 5):
     eff_list = [calc_efficiency_from_weights(inputs, outputs, in_w, out_w) for in_w, out_w in zip(inputs_weights, outputs_weights)]
     eff_list = np.array(eff_list)
+    
+    eff_mean = []
 
     inter_all = []
     for unit_idx in range(len(inputs)):
         intervals = [0]*interval_num
         eff = eff_list[:,unit_idx]
+
+        eff_mean.append(np.mean(eff))
         
         for i in range(interval_num):
             intervals[i] = np.sum((eff>= i/interval_num) & (eff < (i+1)/interval_num))
         intervals[-1] += np.sum(eff >= 1)
         inter_all.append(intervals)
         
-    return np.array(inter_all)/len(inputs_weights[:,0])
+    return np.array(inter_all)/len(inputs_weights[:,0]), eff_mean 
 
 if __name__ == "__main__":
     inputs, units_names, _ = load("inputs.csv")
@@ -292,4 +296,7 @@ if __name__ == "__main__":
     sample_inputs, sample_outputs = load_samples("samples_homework.csv")
     # print(sample_outputs)
     print("\nsamplowanie")
-    print(calc_monte_carlo(inputs, outputs, sample_inputs,sample_outputs))
+    matrix, EE = calc_monte_carlo(inputs, outputs, sample_inputs,sample_outputs)
+
+    print(matrix)
+    print("\n", EE)
