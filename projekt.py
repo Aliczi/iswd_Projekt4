@@ -32,7 +32,19 @@ def load_samples(filename):
     
     return data[:,:border].astype(float), data[:,border:].astype(float)
 
+def calc_HCU(inputs, outputs, lambdas):
+    top = np.sum(lambdas)
+    lambdas = np.copy(lambdas)
+    print(lambdas)
 
+    ret_in = np.zeros_like(inputs[0])
+    ret_out = np.zeros_like(outputs[0])
+
+    for unit_idx in range(len(outputs[:,0])):
+        ret_in += lambdas[unit_idx] * inputs[unit_idx]
+        ret_out += lambdas[unit_idx] * outputs[unit_idx]
+    
+    return ret_in, ret_out
 
 # input-oriented combination-based CCR Model
 def calc_eff(inputs, outputs, index, names = None, do_print = False, do_super_eff = False):
@@ -283,10 +295,19 @@ if __name__ == "__main__":
             super_eff, _ = calc_eff(inputs, outputs, unit_idx, do_super_eff=True)
             text += f"super eff = {super_eff} "
         
+        is_HCU = False
+
         for i, lv in enumerate(lambdas_values):
             if lv > 0 and i != unit_idx:
                 text += f"({lv}){units_names[i]} "
+                is_HCU = True
         print(f"{units_names[unit_idx]} eff = {eff} {text}")
+
+        if is_HCU:
+            round_d = 3
+            HCU_in, HCU_out = calc_HCU(inputs, outputs, lambdas_values)
+            print(f"--> HCU: {np.round(HCU_in,round_d)} {np.round(HCU_out,round_d)}")
+            print(f"--> poprawa: {inputs[unit_idx] - HCU_in}")
 
     print("\ncross_efficiency:")
     cross_eff, cross_eff_matrix = calc_cross_efficiency(inputs,outputs, 2)
